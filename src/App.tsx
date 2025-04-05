@@ -8,6 +8,8 @@ import Dashboard from "./pages/Index";
 import ChatPage from "./pages/ChatPage";
 import AICustomizationPage from "./pages/AICustomizationPage";
 import IntegrationsPage from "./pages/IntegrationsPage";
+import BulkMessagingPage from "./pages/BulkMessagingPage";
+import ContactsPage from "./pages/ContactsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -23,7 +25,8 @@ const App = () => (
           <Route path="/chat" element={<ChatPage />} />
           <Route path="/ai" element={<AICustomizationPage />} />
           <Route path="/integrations" element={<IntegrationsPage />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="/messaging" element={<BulkMessagingPage />} />
+          <Route path="/contacts" element={<ContactsPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

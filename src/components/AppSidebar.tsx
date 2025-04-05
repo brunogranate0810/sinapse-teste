@@ -63,12 +63,12 @@ export function AppSidebar() {
   
   const navItems = [
     { icon: BarChart2, label: 'Dashboard', path: '/' },
-    { icon: MessageSquare, label: 'Live Chat', path: '/chat' },
-    { icon: BrainCircuit, label: 'AI Customization', path: '/ai' },
-    { icon: SendHorizontal, label: 'Bulk Messaging', path: '/messaging' },
-    { icon: Users, label: 'Contacts (CRM)', path: '/contacts' },
-    { icon: LinkIcon, label: 'Integrations', path: '/integrations' },
-    { icon: LayoutGrid, label: 'Settings', path: '/settings' }
+    { icon: MessageSquare, label: 'Chat Ao Vivo', path: '/chat' },
+    { icon: BrainCircuit, label: 'Personalização de IA', path: '/ai' },
+    { icon: SendHorizontal, label: 'Mensagens em Massa', path: '/messaging' },
+    { icon: Users, label: 'Contatos (CRM)', path: '/contacts' },
+    { icon: LinkIcon, label: 'Integrações', path: '/integrations' },
+    { icon: LayoutGrid, label: 'Configurações', path: '/settings' }
   ];
 
   const handleNavigation = (path: string) => {
@@ -79,10 +79,10 @@ export function AppSidebar() {
     <Sidebar>
       <SidebarHeader className="p-4 flex flex-col items-center">
         <div className="flex items-center gap-3">
-          <div className="rounded-md bg-primary p-1.5">
-            <MessageSquare size={24} className="text-primary-foreground" />
+          <div className="rounded-md bg-[#012742] p-1.5">
+            <BrainCircuit size={24} className="text-[#E7F5FF]" />
           </div>
-          <h1 className="text-xl font-bold text-foreground">WhatsAI Flow</h1>
+          <h1 className="text-xl font-bold text-foreground">Sinapse</h1>
         </div>
       </SidebarHeader>
       <Separator />
@@ -106,11 +106,11 @@ export function AppSidebar() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Avatar>
-              <AvatarImage src="https://github.com/shadcn.png" alt="User" />
-              <AvatarFallback>JD</AvatarFallback>
+              <AvatarImage src="https://github.com/shadcn.png" alt="Usuário" />
+              <AvatarFallback>JS</AvatarFallback>
             </Avatar>
             <div>
-              <p className="text-sm font-medium">John Doe</p>
+              <p className="text-sm font-medium">João Silva</p>
               <p className="text-xs text-muted-foreground">Admin</p>
             </div>
           </div>

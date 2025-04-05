@@ -32,28 +32,28 @@ export function WhatsAppChat({ contact, className }: WhatsAppChatProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      content: 'Hello! I saw your ad about the premium package. Can you tell me more about it?',
+      content: 'Olá! Vi seu anúncio sobre o pacote premium. Pode me contar mais sobre ele?',
       timestamp: new Date('2023-08-15T10:23:00'),
       sender: 'contact',
       isRead: true,
     },
     {
       id: '2',
-      content: 'Sure! Our premium package includes 24/7 AI support, unlimited message templates, and integration with your CRM. Would you like to schedule a demo?',
+      content: 'Claro! Nosso pacote premium inclui suporte de IA 24/7, modelos de mensagem ilimitados e integração com seu CRM. Gostaria de agendar uma demonstração?',
       timestamp: new Date('2023-08-15T10:25:00'),
       sender: 'ai',
       isRead: true,
     },
     {
       id: '3',
-      content: 'That sounds interesting. What about the pricing?',
+      content: 'Isso parece interessante. E quanto custa?',
       timestamp: new Date('2023-08-15T10:28:00'),
       sender: 'contact',
       isRead: true,
     },
     {
       id: '4',
-      content: 'Our AI will handle this conversation automatically. You can jump in anytime to take control.',
+      content: 'Nossa IA vai gerenciar essa conversa automaticamente. Você pode intervir a qualquer momento para assumir o controle.',
       timestamp: new Date('2023-08-15T10:28:30'),
       sender: 'user',
       isRead: true,
@@ -109,7 +109,7 @@ export function WhatsAppChat({ contact, className }: WhatsAppChatProps) {
             )}
           >
             <Bot size={16} />
-            <span>AI {aiActive ? 'Active' : 'Paused'}</span>
+            <span>IA {aiActive ? 'Ativo' : 'Pausado'}</span>
           </Button>
         </div>
       </CardHeader>
@@ -121,7 +121,7 @@ export function WhatsAppChat({ contact, className }: WhatsAppChatProps) {
               className={cn(
                 "whatsapp-message",
                 message.sender === 'contact' ? "received" : "sent",
-                message.sender === 'ai' && "bg-blue-50"
+                message.sender === 'ai' && "bg-[#BFE5FF]"
               )}
             >
               {message.sender === 'ai' && (
@@ -148,7 +148,7 @@ export function WhatsAppChat({ contact, className }: WhatsAppChatProps) {
           <Paperclip size={18} />
         </Button>
         <Input
-          placeholder="Type a message..."
+          placeholder="Digite uma mensagem..."
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           className="flex-1"
