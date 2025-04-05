@@ -1,235 +1,293 @@
 
 import React from 'react';
 import { AppLayout } from '@/components/AppLayout';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Code, Database, Globe, Link, Plus, WandSparkles } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsList, TabsContent, TabsTrigger } from '@/components/ui/tabs';
+import { Switch } from '@/components/ui/switch';
+import { Check, ExternalLink, MessageSquare, Mail, Calendar, FileText, ShoppingCart, CreditCard, AlertCircle } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+
+const IntegrationCard = ({ 
+  icon: Icon, 
+  title, 
+  description, 
+  connected = false,
+  available = true,
+  onConnect = () => {}
+}) => {
+  return (
+    <Card className={`border ${connected ? 'border-[#012742]' : ''} ${!available ? 'opacity-60' : ''}`}>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className={`p-2 rounded-md ${connected ? 'bg-[#E7F5FF]' : 'bg-muted'}`}>
+              <Icon size={20} className={connected ? 'text-[#012742]' : ''} />
+            </div>
+            <CardTitle className="text-lg">{title}</CardTitle>
+          </div>
+          {connected && (
+            <div className="flex items-center gap-1 text-xs bg-[#E7F5FF] text-[#012742] px-2 py-1 rounded-full">
+              <Check size={12} /> Conectado
+            </div>
+          )}
+        </div>
+        <CardDescription>{description}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Button 
+          variant={connected ? "outline" : "default"} 
+          className="w-full"
+          onClick={onConnect}
+          disabled={!available}
+        >
+          {connected ? 'Configurar' : available ? 'Conectar' : 'Em breve'}
+          {!connected && available && <ExternalLink size={14} className="ml-2" />}
+        </Button>
+      </CardContent>
+    </Card>
+  );
+};
 
 const IntegrationsPage = () => {
+  const { toast } = useToast();
+  
+  const handleConnectZapier = () => {
+    toast({
+      title: "Integração com Zapier",
+      description: "Por favor, copie o webhook URL e crie um Zap no Zapier.com",
+    });
+  };
+
   return (
-    <AppLayout title="Integrations">
-      <Tabs defaultValue="api" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="api">API Keys</TabsTrigger>
-          <TabsTrigger value="webhooks">Webhooks</TabsTrigger>
-          <TabsTrigger value="connectors">Third-Party Connectors</TabsTrigger>
-        </TabsList>
+    <AppLayout title="Integrações">
+      <Tabs defaultValue="all">
+        <div className="flex justify-between items-center mb-6">
+          <TabsList>
+            <TabsTrigger value="all">Todas</TabsTrigger>
+            <TabsTrigger value="messaging">Mensagens</TabsTrigger>
+            <TabsTrigger value="calendar">Calendário</TabsTrigger>
+            <TabsTrigger value="crm">CRM</TabsTrigger>
+            <TabsTrigger value="payments">Pagamentos</TabsTrigger>
+          </TabsList>
+          
+          <Button variant="outline">
+            Solicitar Integração
+          </Button>
+        </div>
         
-        <TabsContent value="api">
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Your API Keys</h2>
-              <Button>
-                <Plus size={16} className="mr-1" />
-                Create New API Key
-              </Button>
+        <TabsContent value="all" className="mt-0">
+          <div className="mb-8">
+            <h2 className="text-lg font-semibold mb-4">Integrações Populares</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <IntegrationCard
+                icon={MessageSquare}
+                title="WhatsApp Business API"
+                description="Conecte sua conta WhatsApp Business para envio/recepção de mensagens"
+                connected={true}
+              />
+              
+              <IntegrationCard
+                icon={FileText}
+                title="Zapier"
+                description="Automatize fluxos de trabalho com mais de 3.000 aplicativos"
+                onConnect={handleConnectZapier}
+              />
+              
+              <IntegrationCard
+                icon={Calendar}
+                title="Google Agenda"
+                description="Sincronize eventos e reuniões com o Google Agenda"
+              />
             </div>
-            
-            <div className="border rounded-md p-4 flex items-center justify-between">
-              <div>
-                <h3 className="font-medium">Production API Key</h3>
-                <p className="text-sm text-muted-foreground">Created on Aug 10, 2023</p>
-              </div>
-              <div className="flex gap-2">
-                <Button variant="outline">Show Key</Button>
-                <Button variant="destructive">Revoke</Button>
-              </div>
+          </div>
+          
+          <div>
+            <h2 className="text-lg font-semibold mb-4">Todas as Integrações</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <IntegrationCard
+                icon={MessageSquare}
+                title="WhatsApp Business API"
+                description="Conecte sua conta WhatsApp Business para envio/recepção de mensagens"
+                connected={true}
+              />
+              
+              <IntegrationCard
+                icon={Mail}
+                title="Gmail/SMTP"
+                description="Envie e receba emails diretamente da plataforma"
+              />
+              
+              <IntegrationCard
+                icon={Calendar}
+                title="Google Agenda"
+                description="Sincronize eventos e reuniões com o Google Agenda"
+              />
+              
+              <IntegrationCard
+                icon={FileText}
+                title="Zapier"
+                description="Automatize fluxos de trabalho com mais de 3.000 aplicativos"
+              />
+              
+              <IntegrationCard
+                icon={ShoppingCart}
+                title="WooCommerce"
+                description="Integre com sua loja WooCommerce"
+                available={false}
+              />
+              
+              <IntegrationCard
+                icon={CreditCard}
+                title="Stripe"
+                description="Processe pagamentos e assinaturas"
+                available={false}
+              />
             </div>
-            
-            <div className="border rounded-md p-4 flex items-center justify-between">
-              <div>
-                <h3 className="font-medium">Test API Key</h3>
-                <p className="text-sm text-muted-foreground">Created on Jul 25, 2023</p>
-              </div>
-              <div className="flex gap-2">
-                <Button variant="outline">Show Key</Button>
-                <Button variant="destructive">Revoke</Button>
-              </div>
-            </div>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Code size={20} />
-                  API Documentation
-                </CardTitle>
-                <CardDescription>
-                  Use our API to programmatically manage your WhatsApp conversations and AI settings
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <div className="border rounded-md p-3">
-                  <h4 className="font-medium text-sm mb-1">Authentication</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Use your API key in the Authorization header: <code>Authorization: Bearer YOUR_API_KEY</code>
-                  </p>
-                </div>
-                <div className="border rounded-md p-3">
-                  <h4 className="font-medium text-sm mb-1">Base URL</h4>
-                  <p className="text-sm text-muted-foreground">
-                    <code>https://api.whatsaiflow.com/v1</code>
-                  </p>
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button variant="outline" className="w-full">View Full Documentation</Button>
-              </CardFooter>
-            </Card>
           </div>
         </TabsContent>
         
-        <TabsContent value="webhooks">
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Webhooks</h2>
-              <Button>
-                <Plus size={16} className="mr-1" />
-                Create New Webhook
-              </Button>
-            </div>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Link size={20} />
-                  New Lead Webhook
-                </CardTitle>
-                <CardDescription>
-                  This webhook is triggered when a new lead initiates a conversation
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-sm font-medium block mb-1">URL</label>
-                    <Input defaultValue="https://yourapp.com/webhooks/new-lead" />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium block mb-1">Secret Key</label>
-                    <Input type="password" defaultValue="••••••••••••••••••••••••" />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <input type="checkbox" id="active" defaultChecked />
-                    <label htmlFor="active" className="text-sm">Active</label>
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter className="flex justify-between">
-                <Button variant="outline">Test Webhook</Button>
-                <Button>Save Changes</Button>
-              </CardFooter>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Link size={20} />
-                  Conversation Closed Webhook
-                </CardTitle>
-                <CardDescription>
-                  This webhook is triggered when a conversation is marked as closed
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-sm font-medium block mb-1">URL</label>
-                    <Input defaultValue="https://yourcrm.com/api/conversation-closed" />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium block mb-1">Secret Key</label>
-                    <Input type="password" defaultValue="••••••••••••••••••••••••" />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <input type="checkbox" id="active-closed" defaultChecked />
-                    <label htmlFor="active-closed" className="text-sm">Active</label>
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter className="flex justify-between">
-                <Button variant="outline">Test Webhook</Button>
-                <Button>Save Changes</Button>
-              </CardFooter>
-            </Card>
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="connectors">
+        <TabsContent value="messaging" className="mt-0">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <div className="rounded-md p-2 bg-blue-100">
-                    <Database size={20} className="text-blue-600" />
-                  </div>
-                  <CardTitle>Salesforce</CardTitle>
-                </div>
-                <CardDescription>
-                  Connect your Salesforce CRM to sync contacts and conversations
-                </CardDescription>
-              </CardHeader>
-              <CardFooter>
-                <Button className="w-full">Connect</Button>
-              </CardFooter>
-            </Card>
+            <IntegrationCard
+              icon={MessageSquare}
+              title="WhatsApp Business API"
+              description="Conecte sua conta WhatsApp Business para envio/recepção de mensagens"
+              connected={true}
+            />
             
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <div className="rounded-md p-2 bg-green-100">
-                    <Database size={20} className="text-green-600" />
-                  </div>
-                  <CardTitle>HubSpot</CardTitle>
-                </div>
-                <CardDescription>
-                  Sync contacts and conversations with your HubSpot account
-                </CardDescription>
-              </CardHeader>
-              <CardFooter>
-                <Button className="w-full">Connect</Button>
-              </CardFooter>
-            </Card>
+            <IntegrationCard
+              icon={Mail}
+              title="Gmail/SMTP"
+              description="Envie e receba emails diretamente da plataforma"
+            />
             
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <div className="rounded-md p-2 bg-purple-100">
-                    <Globe size={20} className="text-purple-600" />
-                  </div>
-                  <CardTitle>Zapier</CardTitle>
-                </div>
-                <CardDescription>
-                  Connect to 3000+ apps with custom Zapier workflows
-                </CardDescription>
-              </CardHeader>
-              <CardFooter>
-                <Button className="w-full">Connect</Button>
-              </CardFooter>
-            </Card>
+            <IntegrationCard
+              icon={MessageSquare}
+              title="SMS Gateway"
+              description="Envie SMS para seus contatos"
+              available={false}
+            />
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="calendar" className="mt-0">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <IntegrationCard
+              icon={Calendar}
+              title="Google Agenda"
+              description="Sincronize eventos e reuniões com o Google Agenda"
+            />
             
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <div className="rounded-md p-2 bg-yellow-100">
-                    <WandSparkles size={20} className="text-yellow-600" />
-                  </div>
-                  <CardTitle>OpenAI</CardTitle>
-                </div>
-                <CardDescription>
-                  Enhance your AI assistant with custom GPT models
-                </CardDescription>
-              </CardHeader>
-              <CardFooter>
-                <Button className="w-full">Connect</Button>
-              </CardFooter>
-            </Card>
+            <IntegrationCard
+              icon={Calendar}
+              title="Microsoft Outlook"
+              description="Sincronize eventos e reuniões com o Outlook"
+              available={false}
+            />
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="crm" className="mt-0">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <IntegrationCard
+              icon={FileText}
+              title="Zapier"
+              description="Automatize fluxos de trabalho com mais de 3.000 aplicativos"
+              onConnect={handleConnectZapier}
+            />
+            
+            <IntegrationCard
+              icon={FileText}
+              title="Importar/Exportar CSV"
+              description="Importe ou exporte contatos em formato CSV"
+            />
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="payments" className="mt-0">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <IntegrationCard
+              icon={CreditCard}
+              title="Stripe"
+              description="Processe pagamentos e assinaturas"
+              available={false}
+            />
+            
+            <IntegrationCard
+              icon={ShoppingCart}
+              title="WooCommerce"
+              description="Integre com sua loja WooCommerce"
+              available={false}
+            />
           </div>
         </TabsContent>
       </Tabs>
+      
+      <Card className="mt-8">
+        <CardHeader>
+          <CardTitle>Webhook do Zapier</CardTitle>
+          <CardDescription>
+            Use este webhook para integrar o Sinapse com Zapier
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="webhook-url">URL do Webhook</Label>
+            <div className="flex space-x-2">
+              <Input 
+                id="webhook-url" 
+                readOnly 
+                value="https://hooks.zapier.com/hooks/catch/12345/abcdef/" 
+                className="font-mono text-sm"
+              />
+              <Button variant="outline">Copiar</Button>
+            </div>
+          </div>
+          
+          <div className="flex items-start space-x-2 p-3 bg-yellow-50 text-yellow-800 rounded-md">
+            <AlertCircle size={16} className="mt-0.5" />
+            <div className="text-sm">
+              <p><strong>Como usar:</strong> Crie um Zap no Zapier começando com o trigger "Webhook by Zapier", e cole esta URL.</p>
+            </div>
+          </div>
+          
+          <div className="space-y-2 pt-4">
+            <div className="flex items-center justify-between">
+              <Label>Eventos de Ativação</Label>
+              <Button variant="link" size="sm" className="h-auto p-0">
+                Ativar Todos
+              </Button>
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between border p-3 rounded-md">
+                <span>Novo contato criado</span>
+                <Switch checked={true} />
+              </div>
+              <div className="flex items-center justify-between border p-3 rounded-md">
+                <span>Novo estágio no funil</span>
+                <Switch checked={true} />
+              </div>
+              <div className="flex items-center justify-between border p-3 rounded-md">
+                <span>Nova mensagem recebida</span>
+                <Switch />
+              </div>
+              <div className="flex items-center justify-between border p-3 rounded-md">
+                <span>Reunião agendada</span>
+                <Switch />
+              </div>
+            </div>
+          </div>
+          
+          <Button className="w-full">
+            Salvar Configurações
+          </Button>
+        </CardContent>
+      </Card>
     </AppLayout>
   );
-}
+};
 
 export default IntegrationsPage;

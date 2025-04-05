@@ -13,7 +13,7 @@ const mockContacts = [
     name: 'João Silva',
     avatar: 'https://i.pravatar.cc/150?img=1',
     phone: '+55 (11) 99123-4567',
-    status: 'online' as const,
+    status: 'online',
     lastSeen: new Date(),
     lastMessage: {
       content: 'Olá! Vi seu anúncio sobre o pacote premium...',
@@ -27,10 +27,10 @@ const mockContacts = [
     name: 'Maria Oliveira',
     avatar: 'https://i.pravatar.cc/150?img=5',
     phone: '+55 (11) 98987-6543',
-    status: 'typing' as const,
-    lastSeen: new Date('2023-08-15T09:50:00'),
+    status: 'offline',
+    lastSeen: new Date('2023-08-15T09:45:00'),
     lastMessage: {
-      content: "Obrigada pelas informações! Vou analisar e retorno...",
+      content: 'Obrigada pelas informações! Vou analisar e volto a entrar em contato...',
       timestamp: new Date('2023-08-15T09:45:00'),
       unread: false,
       isAiActive: true
@@ -41,10 +41,10 @@ const mockContacts = [
     name: 'Pedro Santos',
     avatar: 'https://i.pravatar.cc/150?img=8',
     phone: '+55 (11) 97456-7890',
-    status: 'offline' as const,
-    lastSeen: new Date('2023-08-14T18:30:00'),
+    status: 'offline',
+    lastSeen: new Date('2023-08-14T16:30:00'),
     lastMessage: {
-      content: "Qual o preço do plano empresarial?",
+      content: 'Qual é o preço do plano empresarial?',
       timestamp: new Date('2023-08-14T16:30:00'),
       unread: false,
       isAiActive: false
@@ -55,10 +55,10 @@ const mockContacts = [
     name: 'Ana Souza',
     avatar: 'https://i.pravatar.cc/150?img=9',
     phone: '+55 (11) 96789-0123',
-    status: 'online' as const,
-    lastSeen: new Date('2023-08-14T15:30:00'),
+    status: 'typing',
+    lastSeen: new Date(),
     lastMessage: {
-      content: 'Existe uma versão de teste gratuita?',
+      content: 'Existe um período de teste disponível?',
       timestamp: new Date('2023-08-14T15:15:00'),
       unread: false,
       isAiActive: true
@@ -69,10 +69,10 @@ const mockContacts = [
     name: 'Carlos Ferreira',
     avatar: 'https://i.pravatar.cc/150?img=3',
     phone: '+55 (11) 95321-6549',
-    status: 'online' as const,
-    lastSeen: new Date('2023-08-14T12:00:00'),
+    status: 'online',
+    lastSeen: new Date(),
     lastMessage: {
-      content: 'Podemos agendar uma demonstração para a próxima semana?',
+      content: 'Você pode agendar uma demonstração para a próxima semana?',
       timestamp: new Date('2023-08-14T11:05:00'),
       unread: false,
       isAiActive: true
@@ -85,7 +85,7 @@ const ChatPage = () => {
   const selectedContact = mockContacts.find(c => c.id === selectedContactId);
   
   return (
-    <AppLayout title="Chat Ao Vivo">
+    <AppLayout title="Chat ao Vivo">
       <div className="flex flex-col lg:flex-row gap-4">
         <div className="w-full lg:w-1/3">
           <ContactList
@@ -100,7 +100,7 @@ const ChatPage = () => {
             <Tabs defaultValue="chat">
               <TabsList className="mb-4">
                 <TabsTrigger value="chat">Chat</TabsTrigger>
-                <TabsTrigger value="info">Informações de Contato</TabsTrigger>
+                <TabsTrigger value="info">Informações do Contato</TabsTrigger>
               </TabsList>
               
               <TabsContent value="chat">
@@ -109,7 +109,7 @@ const ChatPage = () => {
               
               <TabsContent value="info">
                 <Card className="p-4">
-                  <h2 className="text-lg font-semibold mb-4">Informações de Contato</h2>
+                  <h2 className="text-lg font-semibold mb-4">Informações do Contato</h2>
                   <div className="space-y-3">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
@@ -129,7 +129,7 @@ const ChatPage = () => {
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">Agente Designado</p>
+                      <p className="text-sm text-muted-foreground">Atendente Designado</p>
                       <p className="font-medium">Assistente IA (Automático)</p>
                     </div>
                     <div>
@@ -137,7 +137,7 @@ const ChatPage = () => {
                       <div className="flex gap-2 mt-1 flex-wrap">
                         <span className="px-2 py-1 bg-[#E7F5FF] text-[#012742] rounded-md text-xs">Novo Lead</span>
                         <span className="px-2 py-1 bg-[#BFE5FF] text-[#012742] rounded-md text-xs">Empresarial</span>
-                        <span className="px-2 py-1 bg-[#E7F5FF] text-[#012742] rounded-md text-xs">Acompanhamento</span>
+                        <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-md text-xs">Seguimento</span>
                       </div>
                     </div>
                   </div>
@@ -146,7 +146,7 @@ const ChatPage = () => {
             </Tabs>
           ) : (
             <div className="h-[calc(100vh-9rem)] flex items-center justify-center">
-              <p className="text-muted-foreground">Selecione um contato para iniciar o chat</p>
+              <p className="text-muted-foreground">Selecione um contato para iniciar um chat</p>
             </div>
           )}
         </div>

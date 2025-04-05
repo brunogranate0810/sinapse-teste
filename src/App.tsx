@@ -12,6 +12,9 @@ import BulkMessagingPage from "./pages/BulkMessagingPage";
 import ContactsPage from "./pages/ContactsPage";
 import NotFound from "./pages/NotFound";
 
+// Adicionamos o título da plataforma "Sinapse" no documento HTML
+document.title = "Sinapse - Plataforma de IA para Vendas";
+
 const queryClient = new QueryClient();
 
 const App = () => (

@@ -6,12 +6,14 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { 
   Search, Plus, Filter, MoreHorizontal, Star, Phone, Mail,
-  MessageSquare, Calendar, User
+  MessageSquare, Calendar, User, Tag, Pencil, X, Save
 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 
 interface Contact {
   id: string;
@@ -19,10 +21,16 @@ interface Contact {
   email: string;
   phone: string;
   avatar?: string;
-  status: 'novo' | 'qualificado' | 'reunião' | 'proposta' | 'cliente';
+  status: string;
   tags: string[];
   lastContact: Date;
   assigned: string;
+}
+
+interface Stage {
+  id: string;
+  name: string;
+  contacts: Contact[];
 }
 
 const mockContacts: Contact[] = [
@@ -35,7 +43,7 @@ const mockContacts: Contact[] = [
     status: 'novo',
     tags: ['Novo Lead', 'Empresarial'],
     lastContact: new Date('2023-08-15T10:23:00'),
-    assigned: 'AI'
+    assigned: 'IA'
   },
   {
     id: '2',
@@ -46,7 +54,7 @@ const mockContacts: Contact[] = [
     status: 'qualificado',
     tags: ['Qualificado', 'Premium'],
     lastContact: new Date('2023-08-15T09:50:00'),
-    assigned: 'AI'
+    assigned: 'IA'
   },
   {
     id: '3',
@@ -54,7 +62,7 @@ const mockContacts: Contact[] = [
     email: 'pedro@santos.net',
     phone: '+55 (11) 97456-7890',
     avatar: 'https://i.pravatar.cc/150?img=8',
-    status: 'reunião',
+    status: 'reuniao',
     tags: ['Reunião Agendada'],
     lastContact: new Date('2023-08-14T16:30:00'),
     assigned: 'João Cardoso'
@@ -68,7 +76,7 @@ const mockContacts: Contact[] = [
     status: 'proposta',
     tags: ['Proposta Enviada'],
     lastContact: new Date('2023-08-14T15:15:00'),
-    assigned: 'AI'
+    assigned: 'IA'
   },
   {
     id: '5',
@@ -84,235 +92,452 @@ const mockContacts: Contact[] = [
 ];
 
 const ContactsPage = () => {
+  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
-  const [filterStatus, setFilterStatus] = useState<string>('all');
   
-  const filteredContacts = mockContacts.filter(contact => {
-    // Apply search filter
-    const matchesSearch = 
-      contact.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      contact.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      contact.phone.includes(searchQuery);
-    
-    // Apply status filter
-    const matchesStatus = 
-      filterStatus === 'all' || 
-      contact.status === filterStatus;
-    
-    return matchesSearch && matchesStatus;
-  });
-
+  const initialStages: Stage[] = [
+    { id: 'novo', name: 'Novo Lead', contacts: mockContacts.filter(c => c.status === 'novo') },
+    { id: 'qualificado', name: 'Qualificado', contacts: mockContacts.filter(c => c.status === 'qualificado') },
+    { id: 'reuniao', name: 'Reunião', contacts: mockContacts.filter(c => c.status === 'reuniao') },
+    { id: 'proposta', name: 'Proposta', contacts: mockContacts.filter(c => c.status === 'proposta') },
+    { id: 'cliente', name: 'Cliente', contacts: mockContacts.filter(c => c.status === 'cliente') }
+  ];
+  
+  const [stages, setStages] = useState<Stage[]>(initialStages);
+  const [newStageName, setNewStageName] = useState('');
+  const [isAddingStage, setIsAddingStage] = useState(false);
+  const [availableTags, setAvailableTags] = useState<string[]>([
+    'Novo Lead', 'Qualificado', 'Reunião Agendada', 'Proposta Enviada', 'Cliente', 
+    'Empresarial', 'Premium', 'Precisa Seguimento'
+  ]);
+  const [newTag, setNewTag] = useState('');
+  const [isAddingTag, setIsAddingTag] = useState(false);
+  const [newContactTags, setNewContactTags] = useState<string[]>([]);
+  
   const getStatusBadgeColor = (status: string) => {
     const colors = {
-      novo: 'bg-blue-100 text-blue-800',
-      qualificado: 'bg-purple-100 text-purple-800',
-      reunião: 'bg-green-100 text-green-800',
+      novo: 'bg-[#E7F5FF] text-[#012742]',
+      qualificado: 'bg-[#BFE5FF] text-[#012742]',
+      reuniao: 'bg-green-100 text-green-800',
       proposta: 'bg-yellow-100 text-yellow-800',
       cliente: 'bg-[#E7F5FF] text-[#012742]'
     };
     return colors[status as keyof typeof colors] || 'bg-gray-100 text-gray-800';
   };
 
-  const getStatusLabel = (status: string) => {
-    const labels = {
-      novo: 'Novo Lead',
-      qualificado: 'Qualificado',
-      reunião: 'Reunião Agendada',
-      proposta: 'Proposta Enviada',
-      cliente: 'Cliente'
+  const filteredStages = stages.map(stage => {
+    return {
+      ...stage,
+      contacts: stage.contacts.filter(contact => 
+        contact.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        contact.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        contact.phone.includes(searchQuery)
+      )
     };
-    return labels[status as keyof typeof labels] || status;
+  });
+
+  const handleDragEnd = (result: any) => {
+    const { destination, source, draggableId } = result;
+
+    if (!destination) {
+      return;
+    }
+
+    if (
+      destination.droppableId === source.droppableId &&
+      destination.index === source.index
+    ) {
+      return;
+    }
+
+    const sourceStage = stages.find(s => s.id === source.droppableId);
+    const destStage = stages.find(s => s.id === destination.droppableId);
+
+    if (!sourceStage || !destStage) return;
+
+    // Find the contact that was dragged
+    const contactIndex = sourceStage.contacts.findIndex(c => c.id === draggableId);
+    if (contactIndex < 0) return;
+
+    const contactToMove = { ...sourceStage.contacts[contactIndex], status: destination.droppableId };
+    
+    // Create new arrays
+    const newSourceContacts = Array.from(sourceStage.contacts);
+    newSourceContacts.splice(source.index, 1);
+    
+    const newDestContacts = Array.from(destStage.contacts);
+    newDestContacts.splice(destination.index, 0, contactToMove);
+    
+    // Update stages
+    const newStages = stages.map(stage => {
+      if (stage.id === source.droppableId) {
+        return { ...stage, contacts: newSourceContacts };
+      }
+      if (stage.id === destination.droppableId) {
+        return { ...stage, contacts: newDestContacts };
+      }
+      return stage;
+    });
+
+    setStages(newStages);
+    
+    toast({
+      title: "Contato movido",
+      description: `${contactToMove.name} movido para ${destStage.name}`,
+    });
+  };
+
+  const handleAddStage = () => {
+    if (!newStageName.trim()) {
+      toast({
+        title: "Erro",
+        description: "Nome do estágio não pode estar vazio",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const stageId = newStageName.toLowerCase().replace(/\s+/g, '-');
+    
+    if (stages.some(s => s.id === stageId)) {
+      toast({
+        title: "Erro",
+        description: "Já existe um estágio com este nome",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const newStage: Stage = {
+      id: stageId,
+      name: newStageName,
+      contacts: []
+    };
+
+    setStages([...stages, newStage]);
+    setNewStageName('');
+    setIsAddingStage(false);
+    
+    toast({
+      title: "Estágio adicionado",
+      description: `${newStageName} foi adicionado ao funil`,
+    });
+  };
+
+  const handleAddTag = () => {
+    if (!newTag.trim()) {
+      toast({
+        title: "Erro",
+        description: "Nome da tag não pode estar vazio",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (availableTags.includes(newTag)) {
+      toast({
+        title: "Erro",
+        description: "Esta tag já existe",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setAvailableTags([...availableTags, newTag]);
+    if (selectedContact) {
+      setNewContactTags([...newContactTags, newTag]);
+    }
+    setNewTag('');
+    setIsAddingTag(false);
+    
+    toast({
+      title: "Tag adicionada",
+      description: `Tag "${newTag}" foi criada`,
+    });
+  };
+
+  const toggleContactTag = (tag: string) => {
+    if (!selectedContact) return;
+    
+    setNewContactTags(prevTags => 
+      prevTags.includes(tag) 
+        ? prevTags.filter(t => t !== tag)
+        : [...prevTags, tag]
+    );
+  };
+
+  const handleSaveContactTags = () => {
+    if (!selectedContact) return;
+    
+    // Update the contact's tags
+    const updatedStages = stages.map(stage => ({
+      ...stage,
+      contacts: stage.contacts.map(contact => 
+        contact.id === selectedContact.id 
+          ? { ...contact, tags: [...newContactTags] }
+          : contact
+      )
+    }));
+    
+    setStages(updatedStages);
+    
+    // Update the selected contact
+    setSelectedContact({
+      ...selectedContact,
+      tags: [...newContactTags]
+    });
+    
+    toast({
+      title: "Tags atualizadas",
+      description: "As tags do contato foram atualizadas com sucesso",
+    });
   };
 
   const handleSelectContact = (contact: Contact) => {
     setSelectedContact(contact);
+    setNewContactTags([...contact.tags]);
   };
 
   return (
     <AppLayout title="Contatos (CRM)">
-      <div className="flex flex-col lg:flex-row gap-4">
-        <div className="w-full lg:w-2/3">
-          <Card>
-            <CardHeader className="pb-2">
-              <div className="flex justify-between items-center">
-                <CardTitle>Contatos</CardTitle>
-                <Button>
-                  <Plus size={16} className="mr-1" /> Novo Contato
-                </Button>
-              </div>
-              <div className="flex items-center gap-2 mt-4">
-                <div className="relative flex-1">
-                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Pesquisar contatos..."
-                    className="pl-8"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                </div>
-                <Select value={filterStatus} onValueChange={setFilterStatus}>
-                  <SelectTrigger className="w-[180px]">
-                    <Filter size={16} className="mr-2" />
-                    <SelectValue placeholder="Todos os status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos os status</SelectItem>
-                    <SelectItem value="novo">Novo Lead</SelectItem>
-                    <SelectItem value="qualificado">Qualificado</SelectItem>
-                    <SelectItem value="reunião">Reunião Agendada</SelectItem>
-                    <SelectItem value="proposta">Proposta Enviada</SelectItem>
-                    <SelectItem value="cliente">Cliente</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="rounded-md border">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b bg-muted/50">
-                      <th className="py-2 px-3 text-left">Nome</th>
-                      <th className="py-2 px-3 text-left hidden md:table-cell">Email</th>
-                      <th className="py-2 px-3 text-left hidden lg:table-cell">Status</th>
-                      <th className="py-2 px-3 text-right">Ações</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredContacts.map((contact) => (
-                      <tr 
-                        key={contact.id} 
-                        className="border-b hover:bg-muted/50 cursor-pointer"
-                        onClick={() => handleSelectContact(contact)}
-                      >
-                        <td className="py-2 px-3">
-                          <div className="flex items-center gap-3">
-                            <Avatar className="h-8 w-8">
-                              <AvatarImage src={contact.avatar} alt={contact.name} />
-                              <AvatarFallback>{contact.name.charAt(0)}</AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <p className="font-medium">{contact.name}</p>
-                              <p className="text-xs text-muted-foreground md:hidden">
-                                {contact.email}
-                              </p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="py-2 px-3 hidden md:table-cell">{contact.email}</td>
-                        <td className="py-2 px-3 hidden lg:table-cell">
-                          <Badge className={getStatusBadgeColor(contact.status)}>
-                            {getStatusLabel(contact.status)}
-                          </Badge>
-                        </td>
-                        <td className="py-2 px-3 text-right">
-                          <Button variant="ghost" size="icon">
-                            <MoreHorizontal size={16} />
-                          </Button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </CardContent>
-          </Card>
+      <div className="mb-6 flex flex-col md:flex-row justify-between gap-4">
+        <div className="flex items-center gap-2 flex-1">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Pesquisar contatos..."
+              className="pl-8"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <Button variant="outline" className="flex items-center gap-2">
+            <Filter size={16} /> Filtrar
+          </Button>
         </div>
         
-        <div className="w-full lg:w-1/3">
-          {selectedContact ? (
-            <Card>
-              <CardHeader className="text-center pb-2">
+        <Button>
+          <Plus size={16} className="mr-1" /> Novo Contato
+        </Button>
+      </div>
+
+      <div className="flex overflow-x-auto pb-4">
+        <DragDropContext onDragEnd={handleDragEnd}>
+          {filteredStages.map(stage => (
+            <div key={stage.id} className="min-w-[320px] px-2 first:pl-0 last:pr-0">
+              <div className="bg-muted/50 rounded-t-lg p-3 flex items-center justify-between">
+                <h3 className="font-medium flex items-center gap-2">
+                  <Badge className={`${getStatusBadgeColor(stage.id)}`}>{stage.contacts.length}</Badge>
+                  {stage.name}
+                </h3>
+                <Button variant="ghost" size="sm">
+                  <MoreHorizontal size={16} />
+                </Button>
+              </div>
+              
+              <Droppable droppableId={stage.id}>
+                {(provided) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    className="bg-muted/20 rounded-b-lg p-2 min-h-[500px]"
+                  >
+                    {stage.contacts.map((contact, index) => (
+                      <Draggable key={contact.id} draggableId={contact.id} index={index}>
+                        {(provided) => (
+                          <Card
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                            className="mb-3 hover:shadow-md transition-shadow cursor-pointer"
+                            onClick={() => handleSelectContact(contact)}
+                          >
+                            <CardContent className="p-3">
+                              <div className="flex items-center gap-3 mb-2">
+                                <Avatar className="h-8 w-8">
+                                  <AvatarImage src={contact.avatar} alt={contact.name} />
+                                  <AvatarFallback>{contact.name.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <p className="font-medium">{contact.name}</p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {contact.email}
+                                  </p>
+                                </div>
+                              </div>
+                              {contact.tags.length > 0 && (
+                                <div className="flex flex-wrap gap-1 mt-2">
+                                  {contact.tags.slice(0, 2).map((tag, i) => (
+                                    <Badge key={i} variant="secondary" className="bg-[#E7F5FF] text-[#012742]">
+                                      {tag}
+                                    </Badge>
+                                  ))}
+                                  {contact.tags.length > 2 && (
+                                    <Badge variant="outline" className="border-dashed">
+                                      +{contact.tags.length - 2}
+                                    </Badge>
+                                  )}
+                                </div>
+                              )}
+                              <div className="flex justify-between items-center mt-2 text-xs text-muted-foreground">
+                                <span>Atribuído: {contact.assigned}</span>
+                                <span>{new Date(contact.lastContact).toLocaleDateString('pt-BR')}</span>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        )}
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            </div>
+          ))}
+          
+          {isAddingStage ? (
+            <div className="min-w-[320px] px-2">
+              <div className="bg-muted/50 rounded-t-lg p-3">
+                <Input 
+                  value={newStageName}
+                  onChange={(e) => setNewStageName(e.target.value)}
+                  placeholder="Nome do estágio"
+                  className="mb-2"
+                />
+                <div className="flex gap-2">
+                  <Button size="sm" onClick={handleAddStage}>Adicionar</Button>
+                  <Button size="sm" variant="outline" onClick={() => setIsAddingStage(false)}>
+                    Cancelar
+                  </Button>
+                </div>
+              </div>
+              <div className="bg-muted/20 rounded-b-lg p-2 min-h-[500px]"></div>
+            </div>
+          ) : (
+            <div className="min-w-[100px] flex items-start pl-2">
+              <Button 
+                variant="outline" 
+                className="mt-3 w-full border-dashed" 
+                onClick={() => setIsAddingStage(true)}
+              >
+                <Plus size={16} className="mr-1" /> Adicionar Estágio
+              </Button>
+            </div>
+          )}
+        </DragDropContext>
+      </div>
+
+      <Dialog open={!!selectedContact} onOpenChange={(open) => !open && setSelectedContact(null)}>
+        <DialogContent className="max-w-lg">
+          {selectedContact && (
+            <>
+              <DialogHeader>
                 <div className="flex justify-center mb-2">
                   <Avatar className="h-16 w-16">
                     <AvatarImage src={selectedContact.avatar} alt={selectedContact.name} />
                     <AvatarFallback>{selectedContact.name.charAt(0)}</AvatarFallback>
                   </Avatar>
                 </div>
-                <CardTitle>{selectedContact.name}</CardTitle>
-                <Badge className={`mt-2 ${getStatusBadgeColor(selectedContact.status)}`}>
-                  {getStatusLabel(selectedContact.status)}
-                </Badge>
-              </CardHeader>
-              <CardContent>
-                <Tabs defaultValue="details">
-                  <TabsList className="w-full">
-                    <TabsTrigger value="details" className="flex-1">
-                      <User size={14} className="mr-1" /> Detalhes
-                    </TabsTrigger>
-                    <TabsTrigger value="history" className="flex-1">
-                      <MessageSquare size={14} className="mr-1" /> Histórico
-                    </TabsTrigger>
-                    <TabsTrigger value="tasks" className="flex-1">
-                      <Calendar size={14} className="mr-1" /> Tarefas
-                    </TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="details" className="mt-4">
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-2">
-                        <Mail size={14} />
-                        <span>{selectedContact.email}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Phone size={14} />
-                        <span>{selectedContact.phone}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Calendar size={14} />
-                        <span>Último contato: {selectedContact.lastContact.toLocaleDateString()}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Star size={14} />
-                        <span>Atribuído a: {selectedContact.assigned}</span>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-1">Tags</p>
-                        <div className="flex flex-wrap gap-1">
-                          {selectedContact.tags.map((tag, index) => (
-                            <Badge key={index} variant="secondary" className="bg-[#E7F5FF] text-[#012742]">
-                              {tag}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="flex gap-2 mt-4">
-                        <Button variant="outline" className="flex-1">
-                          <MessageSquare size={14} className="mr-1" />
-                          Chat
-                        </Button>
-                        <Button className="flex-1">
-                          <Phone size={14} className="mr-1" />
-                          Ligar
-                        </Button>
-                      </div>
+                <DialogTitle>{selectedContact.name}</DialogTitle>
+                <DialogDescription>
+                  <Badge className={getStatusBadgeColor(selectedContact.status)}>
+                    {stages.find(s => s.id === selectedContact.status)?.name || selectedContact.status}
+                  </Badge>
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <Mail size={14} />
+                  <span>{selectedContact.email}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Phone size={14} />
+                  <span>{selectedContact.phone}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Calendar size={14} />
+                  <span>Último contato: {selectedContact.lastContact.toLocaleDateString('pt-BR')}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Star size={14} />
+                  <span>Atribuído a: {selectedContact.assigned}</span>
+                </div>
+                
+                <div className="border-t pt-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <Label className="text-sm font-medium">Tags</Label>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      onClick={handleSaveContactTags}
+                      className="h-8"
+                    >
+                      <Save size={14} className="mr-1" />
+                      Salvar Tags
+                    </Button>
+                  </div>
+                  
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {availableTags.map((tag, index) => (
+                      <Badge 
+                        key={index} 
+                        variant={newContactTags.includes(tag) ? "default" : "outline"}
+                        onClick={() => toggleContactTag(tag)}
+                        className={`cursor-pointer ${newContactTags.includes(tag) 
+                          ? "bg-[#012742] text-white" 
+                          : "bg-transparent hover:bg-[#E7F5FF] hover:text-[#012742]"}`}
+                      >
+                        <Tag size={10} className="mr-1" />
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                  
+                  {isAddingTag ? (
+                    <div className="flex gap-2 items-center">
+                      <Input
+                        value={newTag}
+                        onChange={(e) => setNewTag(e.target.value)}
+                        placeholder="Nome da tag"
+                        className="flex-1"
+                      />
+                      <Button size="sm" onClick={handleAddTag}>
+                        <Plus size={14} className="mr-1" />
+                        Adicionar
+                      </Button>
+                      <Button size="sm" variant="outline" onClick={() => setIsAddingTag(false)}>
+                        <X size={14} />
+                      </Button>
                     </div>
-                  </TabsContent>
-                  <TabsContent value="history">
-                    <div className="mt-4">
-                      <p className="text-center text-muted-foreground">
-                        Histórico de comunicações com este contato
-                      </p>
-                    </div>
-                  </TabsContent>
-                  <TabsContent value="tasks">
-                    <div className="mt-4">
-                      <p className="text-center text-muted-foreground">
-                        Tarefas relacionadas a este contato
-                      </p>
-                    </div>
-                  </TabsContent>
-                </Tabs>
-              </CardContent>
-            </Card>
-          ) : (
-            <Card className="flex items-center justify-center h-[400px]">
-              <p className="text-muted-foreground">
-                Selecione um contato para ver detalhes
-              </p>
-            </Card>
+                  ) : (
+                    <Button 
+                      variant="outline" 
+                      className="border-dashed w-full" 
+                      onClick={() => setIsAddingTag(true)}
+                    >
+                      <Plus size={14} className="mr-1" />
+                      Criar Nova Tag
+                    </Button>
+                  )}
+                </div>
+                
+                <div className="flex gap-2 mt-4 pt-4 border-t">
+                  <Button className="flex-1">
+                    <MessageSquare size={14} className="mr-1" />
+                    Enviar Mensagem
+                  </Button>
+                  <Button variant="outline" className="flex-1">
+                    <Phone size={14} className="mr-1" />
+                    Ligar
+                  </Button>
+                </div>
+              </div>
+            </>
           )}
-        </div>
-      </div>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 };
