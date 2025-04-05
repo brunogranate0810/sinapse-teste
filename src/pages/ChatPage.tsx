@@ -26,7 +26,7 @@ const mockContacts = [
     avatar: 'https://i.pravatar.cc/150?img=5',
     phone: '+1 (555) 987-6543',
     lastMessage: {
-      content: 'Thanks for the information! I'll get back to you...',
+      content: "Thanks for the information! I'll get back to you...",
       timestamp: new Date('2023-08-15T09:45:00'),
       unread: false,
       isAiActive: true
@@ -38,7 +38,7 @@ const mockContacts = [
     avatar: 'https://i.pravatar.cc/150?img=8',
     phone: '+1 (555) 456-7890',
     lastMessage: {
-      content: 'What's the pricing for the enterprise plan?',
+      content: "What's the pricing for the enterprise plan?",
       timestamp: new Date('2023-08-14T16:30:00'),
       unread: false,
       isAiActive: false
