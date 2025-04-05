@@ -5,6 +5,7 @@ import { ContactList } from '@/components/chat/ContactList';
 import { WhatsAppChat } from '@/components/chat/WhatsAppChat';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ConversationSummary } from '@/components/chat/ConversationSummary';
 
 // Mock data
 const mockContacts = [
@@ -13,70 +14,75 @@ const mockContacts = [
     name: 'João Silva',
     avatar: 'https://i.pravatar.cc/150?img=1',
     phone: '+55 (11) 99123-4567',
-    status: 'online',
+    status: 'online' as const,
     lastSeen: new Date(),
     lastMessage: {
       content: 'Olá! Vi seu anúncio sobre o pacote premium...',
       timestamp: new Date('2023-08-15T10:23:00'),
       unread: true,
       isAiActive: true
-    }
+    },
+    conversationSummary: 'Cliente interessado no pacote premium. Demonstrou preocupação com os custos, mas está aberto a uma demonstração. Próximo passo: agendar apresentação.'
   },
   {
     id: '2',
     name: 'Maria Oliveira',
     avatar: 'https://i.pravatar.cc/150?img=5',
     phone: '+55 (11) 98987-6543',
-    status: 'offline',
+    status: 'offline' as const,
     lastSeen: new Date('2023-08-15T09:45:00'),
     lastMessage: {
       content: 'Obrigada pelas informações! Vou analisar e volto a entrar em contato...',
       timestamp: new Date('2023-08-15T09:45:00'),
       unread: false,
       isAiActive: true
-    }
+    },
+    conversationSummary: 'Cliente recebeu informações sobre os planos e está avaliando. Demonstrou interesse específico na integração com CRM existente. Aguardando retorno.'
   },
   {
     id: '3',
     name: 'Pedro Santos',
     avatar: 'https://i.pravatar.cc/150?img=8',
     phone: '+55 (11) 97456-7890',
-    status: 'offline',
+    status: 'offline' as const,
     lastSeen: new Date('2023-08-14T16:30:00'),
     lastMessage: {
       content: 'Qual é o preço do plano empresarial?',
       timestamp: new Date('2023-08-14T16:30:00'),
       unread: false,
       isAiActive: false
-    }
+    },
+    conversationSummary: 'Lead solicitou informações sobre o plano empresarial. Tem uma equipe de 15 pessoas e busca automação de vendas. Sensível a preço.'
   },
   {
     id: '4',
     name: 'Ana Souza',
     avatar: 'https://i.pravatar.cc/150?img=9',
     phone: '+55 (11) 96789-0123',
-    status: 'typing',
+    status: 'typing' as const,
     lastSeen: new Date(),
     lastMessage: {
       content: 'Existe um período de teste disponível?',
       timestamp: new Date('2023-08-14T15:15:00'),
       unread: false,
       isAiActive: true
-    }
+    },
+    conversationSummary: 'Potencial cliente interessado em período de teste. Mencionou problemas com solução atual e busca alternativas. Já utilizou produtos concorrentes.'
   },
   {
     id: '5',
     name: 'Carlos Ferreira',
     avatar: 'https://i.pravatar.cc/150?img=3',
     phone: '+55 (11) 95321-6549',
-    status: 'online',
+    status: 'online' as const,
     lastSeen: new Date(),
     lastMessage: {
       content: 'Você pode agendar uma demonstração para a próxima semana?',
       timestamp: new Date('2023-08-14T11:05:00'),
       unread: false,
       isAiActive: true
-    }
+    },
+    conversationSummary: 'Cliente pronto para demonstração. Já conhece os principais recursos e está na fase final de decisão. Compara com 2 outros fornecedores.'
   }
 ];
 
@@ -105,6 +111,9 @@ const ChatPage = () => {
               
               <TabsContent value="chat">
                 <WhatsAppChat contact={selectedContact} />
+                {selectedContact.conversationSummary && (
+                  <ConversationSummary summary={selectedContact.conversationSummary} className="mt-4" />
+                )}
               </TabsContent>
               
               <TabsContent value="info">
@@ -139,6 +148,10 @@ const ChatPage = () => {
                         <span className="px-2 py-1 bg-[#BFE5FF] text-[#012742] rounded-md text-xs">Empresarial</span>
                         <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-md text-xs">Seguimento</span>
                       </div>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Resumo da Conversa</p>
+                      <p className="text-sm mt-1">{selectedContact.conversationSummary}</p>
                     </div>
                   </div>
                 </Card>

@@ -24,6 +24,7 @@ interface WhatsAppChatProps {
     phone: string;
     status: 'online' | 'offline' | 'typing';
     lastSeen?: Date;
+    conversationSummary?: string;
   };
   className?: string;
 }
@@ -105,7 +106,7 @@ export function WhatsAppChat({ contact, className }: WhatsAppChatProps) {
             onClick={toggleAI}
             className={cn(
               "flex items-center gap-1",
-              aiActive ? "bg-primary" : ""
+              aiActive ? "bg-[#012742]" : ""
             )}
           >
             <Bot size={16} />
@@ -119,13 +120,16 @@ export function WhatsAppChat({ contact, className }: WhatsAppChatProps) {
             <div
               key={message.id}
               className={cn(
-                "whatsapp-message",
-                message.sender === 'contact' ? "received" : "sent",
-                message.sender === 'ai' && "bg-[#BFE5FF]"
+                "whatsapp-message relative max-w-[80%] p-3 rounded-lg",
+                message.sender === 'contact' 
+                  ? "bg-muted text-foreground self-start rounded-bl-none" 
+                  : message.sender === 'ai'
+                    ? "bg-[#BFE5FF] text-foreground self-end rounded-br-none ml-auto" 
+                    : "bg-[#012742] text-white self-end rounded-br-none ml-auto"
               )}
             >
               {message.sender === 'ai' && (
-                <div className="absolute -left-1 -top-1 bg-primary rounded-full p-0.5">
+                <div className="absolute -left-1 -top-1 bg-[#012742] rounded-full p-0.5">
                   <Bot size={12} className="text-white" />
                 </div>
               )}

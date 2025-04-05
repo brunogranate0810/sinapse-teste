@@ -43,7 +43,7 @@ export function FunnelStage({
               }} 
             />
           </div>
-          <div className="text-xs text-muted-foreground">{percentage}% of total</div>
+          <div className="text-xs text-muted-foreground">{percentage}% do total</div>
         </div>
       </CardContent>
     </Card>

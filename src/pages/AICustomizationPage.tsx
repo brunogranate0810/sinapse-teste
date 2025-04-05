@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { AppLayout } from '@/components/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -10,6 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { PlaybookEditor } from '@/components/ai/PlaybookEditor';
 import { KnowledgeBase } from '@/components/ai/KnowledgeBase';
+import { QualificationQuestions } from '@/components/ai/QualificationQuestions';
 import { Bot, MessageSquare, FileText, Settings, BrainCircuit, Save, Plus, Search } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -37,6 +39,13 @@ const AICustomizationPage = () => {
     }, 1000);
   };
 
+  const handleIntegrationRequest = () => {
+    toast({
+      title: "Solicitação enviada",
+      description: "Nossa equipe entrará em contato para configurar a integração",
+    });
+  };
+
   const toggleChannel = (channel: 'whatsapp' | 'email' | 'sms') => {
     setEnabledChannels(prev => ({
       ...prev,
@@ -57,8 +66,8 @@ const AICustomizationPage = () => {
           <TabsTrigger value="knowledge" className="flex items-center gap-1">
             <BrainCircuit size={16} /> Base de Conhecimento
           </TabsTrigger>
-          <TabsTrigger value="conversations" className="flex items-center gap-1">
-            <MessageSquare size={16} /> Conversas
+          <TabsTrigger value="questions" className="flex items-center gap-1">
+            <MessageSquare size={16} /> Perguntas de Qualificação
           </TabsTrigger>
         </TabsList>
         
@@ -184,7 +193,10 @@ const AICustomizationPage = () => {
                     <p className="text-xs text-muted-foreground mt-1">Conectado</p>
                   </div>
                   
-                  <div className="border border-dashed rounded-lg p-4 text-center hover:border-[#012742] transition-colors cursor-pointer">
+                  <div 
+                    className="border border-dashed rounded-lg p-4 text-center hover:border-[#012742] transition-colors cursor-pointer"
+                    onClick={handleIntegrationRequest}
+                  >
                     <div className="mx-auto w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-2">
                       <Plus size={20} />
                     </div>
@@ -192,7 +204,10 @@ const AICustomizationPage = () => {
                     <p className="text-xs text-muted-foreground mt-1">Conectar SMTP</p>
                   </div>
                   
-                  <div className="border border-dashed rounded-lg p-4 text-center hover:border-[#012742] transition-colors cursor-pointer">
+                  <div 
+                    className="border border-dashed rounded-lg p-4 text-center hover:border-[#012742] transition-colors cursor-pointer"
+                    onClick={handleIntegrationRequest}
+                  >
                     <div className="mx-auto w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-2">
                       <Plus size={20} />
                     </div>
@@ -210,7 +225,16 @@ const AICustomizationPage = () => {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span>Playbooks de Vendas</span>
-                <Button size="sm" className="flex items-center gap-1">
+                <Button 
+                  size="sm" 
+                  className="flex items-center gap-1"
+                  onClick={() => {
+                    toast({
+                      title: "Novo Playbook",
+                      description: "Editor de playbook aberto. Crie seu fluxo de vendas.",
+                    });
+                  }}
+                >
                   <Plus size={16} /> Novo Playbook
                 </Button>
               </CardTitle>
@@ -229,7 +253,16 @@ const AICustomizationPage = () => {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span>Base de Conhecimento</span>
-                <Button size="sm" className="flex items-center gap-1">
+                <Button 
+                  size="sm" 
+                  className="flex items-center gap-1"
+                  onClick={() => {
+                    toast({
+                      title: "Adicionar Documento",
+                      description: "Selecione os documentos para treinar sua IA.",
+                    });
+                  }}
+                >
                   <Plus size={16} /> Adicionar Documento
                 </Button>
               </CardTitle>
@@ -243,80 +276,16 @@ const AICustomizationPage = () => {
           </Card>
         </TabsContent>
         
-        <TabsContent value="conversations">
+        <TabsContent value="questions">
           <Card>
             <CardHeader>
-              <CardTitle>Histórico de Conversas</CardTitle>
+              <CardTitle>Perguntas de Qualificação</CardTitle>
               <CardDescription>
-                Revise conversas passadas da sua IA com clientes
+                Defina as perguntas que sua IA fará para qualificar novos leads
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <div className="relative w-64">
-                    <Input placeholder="Pesquisar conversas" className="pl-8" />
-                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <Label className="text-sm">Filtrar por:</Label>
-                    <select className="text-sm border rounded px-2 py-1">
-                      <option>Todas as conversas</option>
-                      <option>WhatsApp</option>
-                      <option>Email</option>
-                    </select>
-                  </div>
-                </div>
-                
-                <div className="border rounded-md">
-                  <div className="p-4 border-b hover:bg-muted/50 cursor-pointer">
-                    <div className="flex justify-between mb-1">
-                      <p className="font-medium">João Silva</p>
-                      <p className="text-xs text-muted-foreground">Hoje, 10:23</p>
-                    </div>
-                    <p className="text-sm text-muted-foreground truncate">
-                      Olá! Gostaria de saber mais sobre o pacote premium que vocês oferecem...
-                    </p>
-                    <div className="flex items-center mt-2">
-                      <Badge className="bg-green-100 text-green-800 text-xs">Resolvido</Badge>
-                      <span className="text-xs text-muted-foreground ml-2">WhatsApp</span>
-                    </div>
-                  </div>
-                  
-                  <div className="p-4 border-b hover:bg-muted/50 cursor-pointer">
-                    <div className="flex justify-between mb-1">
-                      <p className="font-medium">Maria Oliveira</p>
-                      <p className="text-xs text-muted-foreground">Ontem, 15:47</p>
-                    </div>
-                    <p className="text-sm text-muted-foreground truncate">
-                      Obrigada pelas informações. Vou analisar a proposta e retorno em breve...
-                    </p>
-                    <div className="flex items-center mt-2">
-                      <Badge className="bg-yellow-100 text-yellow-800 text-xs">Aguardando</Badge>
-                      <span className="text-xs text-muted-foreground ml-2">Email</span>
-                    </div>
-                  </div>
-                  
-                  <div className="p-4 hover:bg-muted/50 cursor-pointer">
-                    <div className="flex justify-between mb-1">
-                      <p className="font-medium">Pedro Santos</p>
-                      <p className="text-xs text-muted-foreground">12/04/2023</p>
-                    </div>
-                    <p className="text-sm text-muted-foreground truncate">
-                      Quanto custa o plano empresarial? Temos uma equipe de 15 pessoas...
-                    </p>
-                    <div className="flex items-center mt-2">
-                      <Badge className="bg-blue-100 text-blue-800 text-xs">Em andamento</Badge>
-                      <span className="text-xs text-muted-foreground ml-2">WhatsApp</span>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="flex justify-center">
-                  <Button variant="outline">Carregar mais conversas</Button>
-                </div>
-              </div>
+              <QualificationQuestions />
             </CardContent>
           </Card>
         </TabsContent>

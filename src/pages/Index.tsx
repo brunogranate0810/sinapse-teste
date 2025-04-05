@@ -23,30 +23,26 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatsCard 
             title="Novos Leads" 
-            value="32" 
-            change="+24%" 
-            trend="up" 
+            value={32}
+            change={{ value: 24, isPositive: true }}
             description="nos últimos 30 dias" 
           />
           <StatsCard 
             title="Mensagens" 
-            value="642" 
-            change="+12%" 
-            trend="up" 
+            value={642}
+            change={{ value: 12, isPositive: true }}
             description="mensagens enviadas" 
           />
           <StatsCard 
             title="Taxa de Conversão" 
-            value="8.5%" 
-            change="+1.2%" 
-            trend="up" 
+            value="8.5%"
+            change={{ value: 1.2, isPositive: true }}
             description="mês passado: 7.3%" 
           />
           <StatsCard 
             title="Novos Clientes" 
-            value="9" 
-            change="+3" 
-            trend="up" 
+            value={9}
+            change={{ value: 3, isPositive: true }}
             description="mês passado: 6" 
           />
         </div>
@@ -57,7 +53,7 @@ const Dashboard = () => {
               <CardTitle>Funil de Vendas</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-[300px] w-full">
+              <div className="w-full">
                 <Tabs defaultValue="chart">
                   <div className="flex justify-between items-center mb-4">
                     <TabsList>
@@ -73,7 +69,7 @@ const Dashboard = () => {
                   </div>
                   
                   <TabsContent value="chart" className="mt-0">
-                    <FunnelChart data={funnelData} />
+                    <FunnelChart />
                   </TabsContent>
                   
                   <TabsContent value="stages" className="mt-0">
@@ -81,8 +77,8 @@ const Dashboard = () => {
                       {funnelData.map((stage, index) => (
                         <FunnelStage
                           key={stage.name}
-                          label={stage.name}
-                          value={stage.value}
+                          title={stage.name}
+                          count={stage.value}
                           percentage={Math.round((stage.value / funnelData[0].value) * 100)}
                           conversionRate={index > 0 ? Math.round((stage.value / funnelData[index - 1].value) * 100) : 100}
                           color={stage.color}
