@@ -13,6 +13,8 @@ const mockContacts = [
     name: 'John Smith',
     avatar: 'https://i.pravatar.cc/150?img=1',
     phone: '+1 (555) 123-4567',
+    status: 'online' as const,
+    lastSeen: new Date(),
     lastMessage: {
       content: 'Hello! I saw your ad about the premium package...',
       timestamp: new Date('2023-08-15T10:23:00'),
@@ -25,6 +27,8 @@ const mockContacts = [
     name: 'Emily Johnson',
     avatar: 'https://i.pravatar.cc/150?img=5',
     phone: '+1 (555) 987-6543',
+    status: 'typing' as const,
+    lastSeen: new Date('2023-08-15T09:50:00'),
     lastMessage: {
       content: "Thanks for the information! I'll get back to you...",
       timestamp: new Date('2023-08-15T09:45:00'),
@@ -37,6 +41,8 @@ const mockContacts = [
     name: 'Michael Brown',
     avatar: 'https://i.pravatar.cc/150?img=8',
     phone: '+1 (555) 456-7890',
+    status: 'offline' as const,
+    lastSeen: new Date('2023-08-14T18:30:00'),
     lastMessage: {
       content: "What's the pricing for the enterprise plan?",
       timestamp: new Date('2023-08-14T16:30:00'),
@@ -49,6 +55,8 @@ const mockContacts = [
     name: 'Sarah Wilson',
     avatar: 'https://i.pravatar.cc/150?img=9',
     phone: '+1 (555) 789-0123',
+    status: 'online' as const,
+    lastSeen: new Date('2023-08-14T15:30:00'),
     lastMessage: {
       content: 'Is there a free trial available?',
       timestamp: new Date('2023-08-14T15:15:00'),
@@ -61,6 +69,8 @@ const mockContacts = [
     name: 'David Garcia',
     avatar: 'https://i.pravatar.cc/150?img=3',
     phone: '+1 (555) 321-6549',
+    status: 'online' as const,
+    lastSeen: new Date('2023-08-14T12:00:00'),
     lastMessage: {
       content: 'Can you schedule a demo for next week?',
       timestamp: new Date('2023-08-14T11:05:00'),
